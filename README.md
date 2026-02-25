@@ -10,7 +10,7 @@ Generating the 2000-bit primes may take time from anywhere between a couple of s
 
 After that, you are asked to enter a message (ASCII characters) after which the code gives you the public key component "e" (this isn't the entirety of the public key but I won't go into the details) which you can just copy from the terminal and paste it. 
 
-Next, you should copy an dpaste the private key component "d".
+Next, you should copy and paste the private key component "d".
 
 After all this, you get the ciphertext (a bunch of numbers) and then the decrypted mesage (the original message you entered at the very beginning). 
 
