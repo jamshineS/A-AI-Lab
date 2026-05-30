@@ -1,143 +1,210 @@
-import secrets  
-from sympy import isprime, mod_inverse  
-from math import gcd      
+import secrets
 import math
-import random              
+import random
+from math import gcd
 
 
-# ---------------- MILLER–RABIN PRIMALITY TEST ----------------
+#  __________________________ SIEVE OF ERATOSTHENES — FIRST 1000 PRIMES FOR PRUNING __________________________
 
-def miller_rabin(n, k = 100):
-    """Return True if n is probably prime using the Miller–Rabin test."""
-    
-    if n == 2 or n == 3:        # Handle small primes
+def sieve_of_eratosthenes(limit):
+    sieve = [True] * (limit + 1)
+    sieve[0] = sieve[1] = False
+
+    for num in range(2, int(math.sqrt(limit)) + 1):
+        if sieve[num]:
+            for multiple in range(num * num, limit + 1, num):
+                sieve[multiple] = False
+
+    return [i for i, prime in enumerate(sieve) if prime]
+
+SMALL_PRIMES = sieve_of_eratosthenes(10000)[:1000]
+
+
+#  __________________________ MILLER–RABIN PRIMALITY TEST __________________________
+
+def miller_rabin(n, k=40):
+    if n in (2, 3):
         return True
-    if n <= 1 or n % 2 == 0:    # Reject negatives, 0, 1, and even numbers
+    if n <= 1 or n % 2 == 0:
         return False
 
-    # Write n - 1 as 2^r * d (factor out powers of 2)
     r, d = 0, n - 1
     while d % 2 == 0:
         d //= 2
         r += 1
 
-    # Perform k rounds of testing
     for _ in range(k):
-        a = random.randint(2, n - 2)   # Random base
-        x = pow(a, d, n)               # Compute a^d mod n
+        a = random.randint(2, n - 2)
+        x = pow(a, d, n)
 
-        if x == 1 or x == n - 1:       # Strong probable prime check
+        if x == 1 or x == n - 1:
             continue
 
-        # Repeat squaring step r - 1 times
         for _ in range(r - 1):
             x = pow(x, 2, n)
-            if x == n - 1:             # If we hit -1 mod n, it's probably prime
+            if x == n - 1:
                 break
         else:
-            return False               # Composite number
+            return False
 
-    return True                        # Probably prime
+    return True
 
 
-# ---------------- PRIME GENERATOR ----------------
+#  __________________________ PRIME GENERATOR WITH SIEVE PRUNING __________________________
+
+def candidate_is_prime(candidate):
+    # 1) Trial division by first 1000 primes
+    for p in SMALL_PRIMES:
+        if p * p > candidate:
+            break
+        if candidate % p == 0:
+            return False
+
+    # 2) Miller–Rabin
+    return miller_rabin(candidate, k=40)
+
 
 def generate_large_prime(bits):
-    """Generate a random prime number with the given bit length using Miller–Rabin."""
     while True:
-        candidate = secrets.randbits(bits)   # Generate random number of given bit size
-        candidate |= 1                       # Force odd number
-        candidate |= (1 << (bits - 1))       # Ensure highest bit is 1 → correct bit length
+        candidate = secrets.randbits(bits)
+        candidate |= 1
+        candidate |= (1 << (bits - 1))
 
-        if miller_rabin(candidate):          # Test primality
-            return candidate                 # Return when prime found
-        
-def candidate_is_prime(candidate):
-    """Check if a candidate number is prime using Miller-Rabin test."""
-    return miller_rabin(candidate, 1000)
+        if candidate_is_prime(candidate):
+            return candidate
 
 
-# ---------------- RSA FUNCTIONS ----------------
+#  __________________________ EXTENDED EUCLIDEAN + MODULAR INVERSE __________________________
+
+def euclid_gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+
+def extended_gcd(a, b):
+    if b == 0:
+        return (a, 1, 0)
+    g, x1, y1 = extended_gcd(b, a % b)
+    return (g, y1, x1 - (a // b) * y1)
+
+
+def mod_inverse(a, m):
+    g, x, _ = extended_gcd(a, m)
+    if g != 1:
+        raise ValueError("No modular inverse exists")
+    return x % m
+
+
+#  __________________________ RSA UTILITY FUNCTIONS __________________________
 
 def power_mod(base, exponent, modulus):
-    """Efficient modular exponentiation (square-and-multiply)."""
     result = 1
     b = base % modulus
     while exponent > 0:
-        if exponent & 1:                     # If lowest bit is 1, multiply
+        if exponent & 1:
             result = (result * b) % modulus
-        exponent >>= 1                       # Shift exponent right by 1 bit
-        b = (b * b) % modulus                # Square base each round
+        exponent >>= 1
+        b = (b * b) % modulus
     return result
 
+
 def choose_e(phi):
-    """Choose a public exponent e that is coprime with phi."""
-    e = 65537                                # Standard RSA public exponent
+    e = 65537
     if gcd(e, phi) == 1:
         return e
-    e = 3                                    # Fallback: try odd numbers
+    e = 3
     while gcd(e, phi) != 1:
         e += 2
     return e
 
+
 def string_to_int(s):
-    """Convert a string into an integer."""
-    return int.from_bytes(s.encode(), byteorder='little')
+    return int.from_bytes(s.encode(), "little")
+
 
 def int_to_string(i):
-    """Convert an integer back into a string."""
     length = math.ceil(i.bit_length() / 8)
-    return i.to_bytes(length, byteorder='little').decode()
+    return i.to_bytes(length, "little").decode()
 
 
-# ---------------- RSA SETUP ----------------
+#  __________________________ FUNCTION TEST SUITE __________________________
 
-bits = 2000                                  # RSA prime size (2000-bit primes)
+def functions_check():
+    """Backend only. Raises errors if something is wrong."""
+    
+    # Test Euclidean GCD
+    assert euclid_gcd(48, 18) == 6
 
-print("Generating 2000-bit primes... this may take a moment.")
+    # Test extended GCD consistency
+    g, x, y = extended_gcd(101, 23)
+    assert g == 101 * x + 23 * y
 
-p = generate_large_prime(bits)               # First large prime
-q = generate_large_prime(bits)               # Second large prime
+    # Test modular inverse
+    inv = mod_inverse(17, 3120)
+    assert (17 * inv) % 3120 == 1
 
-n = p * q                                    # RSA modulus
-phi = (p - 1) * (q - 1)                      # Euler's totient
-e = choose_e(phi)                            # Public exponent
-d = mod_inverse(e, phi)                      # Private exponent (modular inverse)
+    # Test power_mod vs built-in pow
+    assert power_mod(7, 12345, 9973) == pow(7, 12345, 9973)
 
-print("Keys generated successfully.\n")
+    # Test string conversion round-trip
+    s = "Hello RSA"
+    assert int_to_string(string_to_int(s)) == s
 
+    # Test choose_e
+    e = choose_e(3120)
+    assert gcd(e, 3120) == 1
 
-# ---------------- ENCRYPTION ----------------
-
-message_str = input("Enter a message: ")     # User input
-message = string_to_int(message_str)         # Convert message to integer
-
-if message >= n:                             # Ensure message fits in modulus
-    raise ValueError("Message too large for RSA modulus. Use a shorter message.")
-
-print("\nPublic key component (e):", e)
-entered_e = int(input("Enter the public key component: "))
-
-if entered_e != e:                           # Simple correctness check
-    raise ValueError("Incorrect public key component.")
-
-cipher = power_mod(message, e, n)            # Encrypt message
+    # If we reach here, everything is OK
+    return True
 
 
-# ---------------- DECRYPTION ----------------
 
-print("\nPrivate key component (d):", d)
-entered_d = int(input("Enter the private key component: "))
+#  __________________________ RSA KEY GENERATION + ENCRYPTION + DECRYPTION __________________________
 
-if entered_d != d:                           # Check private key correctness
-    raise ValueError("Incorrect private key component.")
+if __name__ == "__main__":
+    functions_check()
 
-decrypted_int = power_mod(cipher, d, n)      # Decrypt ciphertext
-decrypted = int_to_string(decrypted_int)     # Convert back to string
+    bits = 1024  # use 1024 for speed; change to 2000 later
 
+    print("Generating primes...")
+    p = generate_large_prime(bits)
+    q = generate_large_prime(bits)
 
-# ---------------- OUTPUT ----------------
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    e = choose_e(phi)
+    d = mod_inverse(e, phi)
 
-print("\nCiphertext:", cipher)
-print("Decrypted message:", decrypted)
+    print("\nKeys generated successfully.\n")
 
+    # ---------------- ENCRYPTION ----------------
+
+    message_str = input("Enter a message: ")
+    m = string_to_int(message_str)
+
+    if m >= n:
+        raise ValueError("Message too large for RSA modulus.")
+
+    print("\nPublic key component (e):", e)
+    entered_e = int(input("Enter the public key component: "))
+
+    if entered_e != e:
+        raise ValueError("Incorrect public key component.")
+
+    cipher = power_mod(m, e, n)
+
+    # ---------------- DECRYPTION ----------------
+
+    print("\nPrivate key component (d):", d)
+    entered_d = int(input("Enter the private key component: "))
+
+    if entered_d != d:
+        raise ValueError("Incorrect private key component.")
+
+    decrypted = int_to_string(power_mod(cipher, d, n))
+
+    # ---------------- OUTPUT ----------------
+
+    print("\nCiphertext:", cipher)
+    print("Decrypted message:", decrypted)
