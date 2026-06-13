@@ -1,5 +1,5 @@
 import unittest
-import crypts
+import cryptography_ui
 
 # ---------------- SMALL TESTS ----------------
 
