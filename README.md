@@ -4,7 +4,7 @@ This is a short summary on how to run the programme, in case cryptography isn't 
 
 NOTE! The code can only make use of the ASCII characters!
 
-Edit: It was tested using non ASCII characters such as ä and ö, and it worked just fine.
+EDIT! It was tested using non ASCII characters such as ä and ö, and it worked just fine.
 
 To run the programme, download the raw file and add it to the folder (if you have a separate one) for this course. You may need to use a virtual environment (venv) is the code doesn't work on the non-virtual terminal and also would have to download some of the packagaes (MAYBE--- it depends). 
 
