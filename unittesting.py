@@ -1,5 +1,7 @@
 import unittest
-import crypts   
+import crypts
+
+# ---------------- SMALL TESTS ----------------
 
 class TestRSA_small(unittest.TestCase):
 
@@ -15,7 +17,8 @@ class TestRSA_small(unittest.TestCase):
         self.assertEqual((17 * inv) % 3120, 1)
 
     def test_power_mod(self):
-        self.assertEqual(crypts.power_mod(7, 12345, 9973), pow(7, 12345, 9973))
+        self.assertEqual(crypts.power_mod(7, 12345, 9973),
+                         pow(7, 12345, 9973))
 
     def test_string_conversion(self):
         s = "Hello RSA world!"
@@ -27,8 +30,7 @@ class TestRSA_small(unittest.TestCase):
 
 
 
-
-
+# ---------------- LARGE TESTS ----------------
 
 class TestRSA_main(unittest.TestCase):
 
@@ -57,10 +59,12 @@ class TestRSA_main(unittest.TestCase):
                          pow(base, exp, mod))
 
     def test_string_conversion(self):
-        s = "RSA cryptosystem is a family of public-key cryptosystems, widely used for secure data transmission. RSA stands for Rivest-Shamir-Adleman, the peoplewho publicly described the algorithm in 1977."
+        s = ("RSA cryptosystem is a family of public-key cryptosystems, widely used for secure data "
+             "transmission. RSA stands for Rivest-Shamir-Adleman, the people who publicly described "
+             "the algorithm in 1977.")
         self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
 
     def test_choose_e(self):
         phi = 123456789123456789123456789123456789123456789123456789123456789123456789123457
-        e = crypts.choose_e(crypts.phi)
-        self.assertEqual(crypts.gcd(e, crypts.phi), 1)
+        e = crypts.choose_e(phi)
+        self.assertEqual(crypts.gcd(e, phi), 1)
