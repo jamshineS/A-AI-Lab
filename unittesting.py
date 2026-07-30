@@ -1,10 +1,15 @@
 import unittest
-import cryptography_ui
+import cryptography_ui as crypts
 
 # ---------------- SMALL TESTS ----------------
 
 class TestRSA_small(unittest.TestCase):
 
+    def test_miller_rabin(self):
+        self.assertTrue(crypts.miller_rabin(53))
+        self.assertTrue(crypts.miller_rabin(59))
+        self.assertFalse(crypts.miller_rabin(55))
+    
     def test_euclid_gcd(self):
         self.assertEqual(crypts.euclid_gcd(48, 18), 6)
 
@@ -34,6 +39,10 @@ class TestRSA_small(unittest.TestCase):
 
 class TestRSA_main(unittest.TestCase):
 
+    def test_miller_rabin(self):
+        self.assertTrue(crypts.miller_rabin(1000000000000066600000000000001))
+        self.assertTrue(crypts.miller_rabin(170141183460469231731687303715884105727))
+    
     def test_euclid_gcd(self):
         a = 9876543219876543219876543219876543219876
         b = 1234567891234567891234567891234567891234
