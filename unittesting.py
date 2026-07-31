@@ -3,12 +3,24 @@ import cryptography_ui as crypts
 
 # ---------------- SMALL TESTS ----------------
 
-class TestRSA_small(unittest.TestCase):
+class Test_Miller_Rabin(unittest.TestCase):
 
-    def test_miller_rabin(self):
-        self.assertTrue(crypts.miller_rabin(53))
-        self.assertTrue(crypts.miller_rabin(59))
-        self.assertFalse(crypts.miller_rabin(55))
+    def test_small_primes(self):
+        primes = [2, 3, 5, 7, 11, 13, 17, 19, 23]
+
+        for p in primes:
+            with self.subTest(p=p):
+                self.assertTrue(crypts.miller_rabin(p))
+
+    def test_small_composites(self):
+        composites = [0, 1, 4, 6, 8, 9, 10, 12, 15, 21, 25]
+
+        for n in composites:
+            with self.subTest(n=n):
+                self.assertFalse(crypts.miller_rabin(n))
+                
+
+class TestRSA_small(unittest.TestCase):
     
     def test_euclid_gcd(self):
         self.assertEqual(crypts.euclid_gcd(48, 18), 6)
@@ -39,9 +51,16 @@ class TestRSA_small(unittest.TestCase):
 
 class TestRSA_main(unittest.TestCase):
 
-    def test_miller_rabin(self):
-        self.assertTrue(crypts.miller_rabin(1000000000000066600000000000001))
-        self.assertTrue(crypts.miller_rabin(170141183460469231731687303715884105727))
+    def test_miller_rabin_large(self):
+        p1 = 170141183460469231731687303715884105727
+        p2 = 2^521 - 1
+
+        self.assertTrue(crypts.miller_rabin(p1))
+        self.assertTrue(crypts.miller_rabin(p2))
+
+        self.assertFalse(crypts.miller_rabin(p1 * p1))
+        self.assertFalse(crypts.miller_rabin(p1 * p2))
+        self.assertFalse(crypts.miller_rabin(p2 * p2))
     
     def test_euclid_gcd(self):
         a = 9876543219876543219876543219876543219876
