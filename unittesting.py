@@ -226,48 +226,184 @@ class TestRSA_small(unittest.TestCase):
 
 class TestRSA_main(unittest.TestCase):
 
-    def test_miller_rabin_large(self):
-        p1 = 170141183460469231731687303715884105727
-        p2 = 2^521 - 1
+    # ---------------- Miller-Rabin ----------------
 
-        self.assertTrue(crypts.miller_rabin(p1))
-        self.assertTrue(crypts.miller_rabin(p2))
+    def test_miller_rabin_large_2(self):
+        p = 2305843009213693951          # 2^61 - 1 (prime)
+        q = 2147483647                  # 2^31 - 1 (prime)
 
-        self.assertFalse(crypts.miller_rabin(p1 * p1))
-        self.assertFalse(crypts.miller_rabin(p1 * p2))
-        self.assertFalse(crypts.miller_rabin(p2 * p2))
-    
-    def test_euclid_gcd(self):
-        a = 9876543219876543219876543219876543219876
-        b = 1234567891234567891234567891234567891234
-        self.assertEqual(crypts.euclid_gcd(a, b), 2)
+        self.assertTrue(crypts.miller_rabin(p))
+        self.assertTrue(crypts.miller_rabin(q))
+        self.assertFalse(crypts.miller_rabin(p * q))
 
-    def test_extended_gcd(self):
-        a = 99999999999999999999999999999999999999991
-        b = 88888888888888888888888888888888888888889
+    def test_miller_rabin_large_3(self):
+        p = 32416190071
+        q = 32416187567
+
+        self.assertTrue(crypts.miller_rabin(p))
+        self.assertTrue(crypts.miller_rabin(q))
+        self.assertFalse(crypts.miller_rabin(p * q))
+
+    def test_miller_rabin_large_4(self):
+        p = 618970019642690137449562111  # 2^89 - 1 (prime)
+        self.assertTrue(crypts.miller_rabin(p))
+        self.assertFalse(crypts.miller_rabin(p * p))
+
+    def test_miller_rabin_large_5(self):
+        p = 170141183460469231731687303715884105727
+        q = 2305843009213693951
+
+        self.assertTrue(crypts.miller_rabin(q))
+        self.assertFalse(crypts.miller_rabin(p * q))
+
+    # ---------------- Euclid GCD ----------------
+
+    def test_euclid_gcd_2(self):
+        a = 99999999999999999999999999999999999999990
+        b = 55555555555555555555555555555555555555550
+        self.assertEqual(crypts.euclid_gcd(a, b), 10)
+
+    def test_euclid_gcd_3(self):
+        a = 1234567890123456789012345678901234567890
+        b = 9876543210987654321098765432109876543210
+        self.assertEqual(crypts.euclid_gcd(a, b), 900000000090)
+
+    def test_euclid_gcd_4(self):
+        a = 32416190071
+        b = 32416187567
+        self.assertEqual(crypts.euclid_gcd(a, b), 1)
+
+    def test_euclid_gcd_5(self):
+        a = 2**256
+        b = 2**128
+        self.assertEqual(crypts.euclid_gcd(a, b), 2**128)
+
+    # ---------------- Extended GCD ----------------
+
+    def test_extended_gcd_2(self):
+        a = 987654321987654321987654321987654321
+        b = 123456789123456789123456789123456789
         g, x, y = crypts.extended_gcd(a, b)
         self.assertEqual(g, a*x + b*y)
 
-    def test_mod_inverse(self):
-        a = 12345678912345678912345678912345678912345
-        m = 98765432198765432198765432198765432198767
+    def test_extended_gcd_3(self):
+        a = 2**256 - 189
+        b = 2**255 - 31
+        g, x, y = crypts.extended_gcd(a, b)
+        self.assertEqual(g, a*x + b*y)
+
+    def test_extended_gcd_4(self):
+        a = 32416190071
+        b = 2305843009213693951
+        g, x, y = crypts.extended_gcd(a, b)
+        self.assertEqual(g, a*x + b*y)
+
+    def test_extended_gcd_5(self):
+        a = 99999999999999999999999999999999999999999991
+        b = 88888888888888888888888888888888888888888889
+        g, x, y = crypts.extended_gcd(a, b)
+        self.assertEqual(g, a*x + b*y)
+
+    # ---------------- Modular Inverse ----------------
+
+    def test_mod_inverse_2(self):
+        a = 65537
+        m = 100000000000000000000000000000000000000003
         inv = crypts.mod_inverse(a, m)
         self.assertEqual((a * inv) % m, 1)
 
-    def test_power_mod(self):
-        base = 123456789123456789123456789123456789
-        exp  = 987654321987654321987654321987654321
-        mod  = 999999999999999999999999999999999937
-        self.assertEqual(crypts.power_mod(base, exp, mod),
-                         pow(base, exp, mod))
+    def test_mod_inverse_3(self):
+        a = 123456789987654321
+        m = 100000000000000000003
+        inv = crypts.mod_inverse(a, m)
+        self.assertEqual((a * inv) % m, 1)
 
-    def test_string_conversion(self):
-        s = ("RSA cryptosystem is a family of public-key cryptosystems, widely used for secure data "
-             "transmission. RSA stands for Rivest-Shamir-Adleman, the people who publicly described "
-             "the algorithm in 1977.")
+    def test_mod_inverse_4(self):
+        a = 987654321123456789
+        m = 2305843009213693951
+        inv = crypts.mod_inverse(a, m)
+        self.assertEqual((a * inv) % m, 1)
+
+    def test_mod_inverse_5(self):
+        a = 32416187567
+        m = 32416190071
+        inv = crypts.mod_inverse(a, m)
+        self.assertEqual((a * inv) % m, 1)
+
+    # ---------------- Power Mod ----------------
+
+    def test_power_mod_2(self):
+        base = 987654321987654321987654321
+        exp = 123456789123456789123456789
+        mod = 1000000000000000000000000007
+        self.assertEqual(
+            crypts.power_mod(base, exp, mod),
+            pow(base, exp, mod)
+        )
+
+    def test_power_mod_3(self):
+        base = 2**128 + 1
+        exp = 2**20 + 12345
+        mod = 2**127 - 1
+        self.assertEqual(
+            crypts.power_mod(base, exp, mod),
+            pow(base, exp, mod)
+        )
+
+    def test_power_mod_4(self):
+        base = 32416190071
+        exp = 2305843009213693951
+        mod = 1000000007
+        self.assertEqual(
+            crypts.power_mod(base, exp, mod),
+            pow(base, exp, mod)
+        )
+
+    def test_power_mod_5(self):
+        base = 987654321234567890123456789
+        exp = 999999999999999999999999999
+        mod = 999999999999999999999999937
+        self.assertEqual(
+            crypts.power_mod(base, exp, mod),
+            pow(base, exp, mod)
+        )
+
+    # ---------------- String Conversion ----------------
+
+    def test_string_conversion_2(self):
+        s = "A" * 1000
         self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
 
-    def test_choose_e(self):
-        phi = 123456789123456789123456789123456789123456789123456789123456789123456789123457
+    def test_string_conversion_3(self):
+        s = "0123456789" * 250
+        self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
+
+    def test_string_conversion_4(self):
+        s = "The quick brown fox jumps over the lazy dog. " * 100
+        self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
+
+    def test_string_conversion_5(self):
+        s = ("RSA encryption and decryption " * 200).strip()
+        self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
+
+    # ---------------- choose_e ----------------
+
+    def test_choose_e_2(self):
+        phi = 2**512 - 1
+        e = crypts.choose_e(phi)
+        self.assertEqual(crypts.gcd(e, phi), 1)
+
+    def test_choose_e_3(self):
+        phi = 10**120 + 39
+        e = crypts.choose_e(phi)
+        self.assertEqual(crypts.gcd(e, phi), 1)
+
+    def test_choose_e_4(self):
+        phi = 99999999999999999999999999999999999999999999999999999999999999991
+        e = crypts.choose_e(phi)
+        self.assertEqual(crypts.gcd(e, phi), 1)
+
+    def test_choose_e_5(self):
+        phi = (2**521 - 1) - 1
         e = crypts.choose_e(phi)
         self.assertEqual(crypts.gcd(e, phi), 1)
