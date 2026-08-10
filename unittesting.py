@@ -236,29 +236,29 @@ class TestRSA_main(unittest.TestCase):
         self.assertFalse(crypts.miller_rabin(p * q)) 
 
     def test_miller_rabin_large_2(self):
-        p = 2305843009213693951          # 2^61 - 1 (prime)
-        q = 2147483647                  # 2^31 - 1 (prime)
+        p = 2**607 - 1         
+        q = 2**1279 - 1
 
         self.assertTrue(crypts.miller_rabin(p))
         self.assertTrue(crypts.miller_rabin(q))
         self.assertFalse(crypts.miller_rabin(p * q))
 
     def test_miller_rabin_large_3(self):
-        p = 32416190071
-        q = 32416187567
+        p = 2**2203 - 1
+        q = 2**2281 - 1
 
         self.assertTrue(crypts.miller_rabin(p))
         self.assertTrue(crypts.miller_rabin(q))
         self.assertFalse(crypts.miller_rabin(p * q))
 
     def test_miller_rabin_large_4(self):
-        p = 618970019642690137449562111  # 2^89 - 1 (prime)
+        p = 2**3217 - 1
         self.assertTrue(crypts.miller_rabin(p))
         self.assertFalse(crypts.miller_rabin(p * p))
 
     def test_miller_rabin_large_5(self):
-        p = 170141183460469231731687303715884105727
-        q = 2305843009213693951
+        p = 2**4253 - 1
+        q = 2**4423 - 1
 
         self.assertTrue(crypts.miller_rabin(q))
         self.assertFalse(crypts.miller_rabin(p * q))
