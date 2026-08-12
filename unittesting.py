@@ -404,7 +404,7 @@ class TestRSA_main(unittest.TestCase):
     # ---------------- String Conversion ----------------
 
     def test_string_conversion(self): 
-        s = ("According to Google, RSA cryptosystem is a family of public-key cryptosystems, widely used for secure data transmission." 
+        s = "According to Google, RSA cryptosystem is a family of public-key cryptosystems, widely used for secure data transmission." 
         self.assertEqual(crypts.int_to_string(crypts.string_to_int(s)), s)
 
     def test_string_conversion_2(self):
