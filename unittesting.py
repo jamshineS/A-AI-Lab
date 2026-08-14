@@ -273,12 +273,12 @@ class TestRSA_main(unittest.TestCase):
     def test_euclid_gcd_2(self):
         a = 99999999999999999999999999999999999999990
         b = 55555555555555555555555555555555555555550
-        self.assertEqual(crypts.euclid_gcd(a, b), 10)
+        self.assertEqual(crypts.euclid_gcd(a, b), 11111111111111111111111111111111111111110)
 
     def test_euclid_gcd_3(self):
         a = 1234567890123456789012345678901234567890
         b = 9876543210987654321098765432109876543210
-        self.assertEqual(crypts.euclid_gcd(a, b), 900000000090)
+        self.assertEqual(crypts.euclid_gcd(a, b), 90000000009000000000900000000090)
 
     def test_euclid_gcd_4(self):
         a = 32416190071
